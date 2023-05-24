@@ -1,3 +1,4 @@
+const schemeModel = require("./scheme-model");
 /*
   Eğer `scheme_id` veritabanında yoksa:
 
@@ -6,8 +7,18 @@
     "message": "scheme_id <gerçek id> id li şema bulunamadı"
   }
 */
-const checkSchemeId = (req, res, next) => {
-
+const checkSchemeId = async (req, res, next) => {
+try {
+  const isExistScheme= await schemeModel.findById(req.params.scheme_id);
+  if(!isExistScheme){
+    res.status(404).json({message:`scheme_id ${req.params.scheme_id} id li şema bulunamadı`})
+  } else {
+    req.currentScheme = isExistScheme;
+    next();
+  }
+} catch (error) {
+  next(error);
+}
 }
 
 /*
@@ -19,7 +30,16 @@ const checkSchemeId = (req, res, next) => {
   }
 */
 const validateScheme = (req, res, next) => {
-
+try {
+  const { scheme_name}= req.body;
+  if(!scheme_name ){
+    res.status(400).json({message:"Geçersiz scheme_name"});
+  }else {
+    next();
+  }
+} catch (error) {
+  next(error);
+}
 }
 
 /*
@@ -32,7 +52,16 @@ const validateScheme = (req, res, next) => {
   }
 */
 const validateStep = (req, res, next) => {
-
+try {
+  const {instructions, step_number} = req.body;
+  if(!instructions || typeof(step_number)!="number" || step_number<1){
+    res.status(400).json({"message":"hatalı step"});
+  }else{
+    next();
+  }
+} catch (error) {
+  next(error);
+}
 }
 
 module.exports = {
